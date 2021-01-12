@@ -69,6 +69,9 @@ private:
   struct ff_effect joy_effect_;
   bool update_feedback_;
 
+  std::vector<float> default_axes_{0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, -0.0};
+  std::vector<int> default_buttons_{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
   diagnostic_updater::Updater diagnostic_;
 
   /// \brief Publishes diagnostics and status
@@ -523,7 +526,12 @@ public:
           // the device opens.
           joy_msg.header.stamp = ros::Time().now();
           joy_msg.header.frame_id = joy_dev_.c_str();
-          pub_.publish(joy_msg);
+
+          // Don't publish if all messages are 0 and state hasn't changed
+          if (joy_msg.axes != default_axes_)
+          {
+            pub_.publish(joy_msg);
+          }
 
           publish_now = false;
           tv_set = false;
